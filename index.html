@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LinkSpy – Track Your Links</title>
+    <title>LinkSpy Pro – Track & Monetize Links</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -21,10 +21,27 @@
                             700: '#4338ca',
                             800: '#3730a3',
                             900: '#312e81',
+                        },
+                        dark: {
+                            900: '#0a0a0f',
+                            800: '#13131a',
+                            700: '#1c1c26'
                         }
                     },
                     fontFamily: {
                         sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'blob': 'blob 7s infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        }
                     }
                 }
             }
@@ -35,307 +52,425 @@
         * { font-family: 'Inter', system-ui, sans-serif; }
 
         body {
-            background: black;
+            background-color: #0a0a0f;
+            color: #ffffff;
             min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
         }
 
+        /* Animated Background Orbs */
+        .bg-shape {
+            position: absolute;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.5;
+            border-radius: 50%;
+            animation: blob 10s infinite alternate;
+        }
+        .bg-shape-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: rgba(99, 102, 241, 0.3); animation-delay: 0s; }
+        .bg-shape-2 { top: 40%; right: -10%; width: 400px; height: 400px; background: rgba(139, 92, 246, 0.3); animation-delay: 2s; }
+        .bg-shape-3 { bottom: -20%; left: 20%; width: 600px; height: 600px; background: rgba(56, 189, 248, 0.2); animation-delay: 4s; }
+
         .glass-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
         }
 
         .glass-card-hover:hover {
-            background: rgba(255, 255, 255, 0.06);
-            border-color: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(99, 102, 241, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.1);
         }
 
         .glow-input:focus {
-            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3), 0 0 30px rgba(99, 102, 241, 0.1);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5), 0 0 20px rgba(99, 102, 241, 0.2);
+            border-color: rgba(99, 102, 241, 0.8);
         }
 
         .glow-btn {
             background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
             transition: all 0.3s ease;
         }
+        .glow-btn:hover { box-shadow: 0 6px 25px rgba(99, 102, 241, 0.5); transform: translateY(-1px); }
+        .glow-btn:active { transform: translateY(0); }
 
-        .glow-btn:hover {
-            box-shadow: 0 6px 25px rgba(99, 102, 241, 0.6);
-            transform: translateY(-1px);
+        .status-badge {
+            display: inline-flex;
+            items-center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.025em;
         }
+        .status-clicked { background: rgba(34, 197, 94, 0.1); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.2); }
+        .status-pending { background: rgba(250, 204, 21, 0.1); color: #facc15; border: 1px solid rgba(250, 204, 21, 0.2); }
 
-        .glow-btn:active {
-            transform: translateY(0);
+        /* Ads Styling */
+        .ad-container {
+            width: 100%;
+            background: repeating-linear-gradient( 45deg, rgba(255,255,255,0.02), rgba(255,255,255,0.02) 10px, rgba(255,255,255,0.01) 10px, rgba(255,255,255,0.01) 20px );
+            border: 1px dashed rgba(255,255,255,0.1);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
         }
-
-        .status-clicked {
-            background: rgba(34, 197, 94, 0.1);
-            border: 1px solid rgba(34, 197, 94, 0.3);
-            color: #4ade80;
-        }
-
-        .status-pending {
-            background: rgba(250, 204, 21, 0.1);
-            border: 1px solid rgba(250, 204, 21, 0.3);
-            color: #facc15;
-        }
-
-        .copy-toast {
-            animation: slideUp 0.3s ease, fadeOut 0.3s ease 1.7s;
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(10px) translateX(-50%); }
-            to { opacity: 1; transform: translateY(0) translateX(-50%); }
-        }
-
-        @keyframes fadeOut {
-            from { opacity: 1; }
-            to { opacity: 0; }
-        }
-
-        @keyframes pulse-ring {
-            0% { transform: scale(0.8); opacity: 1; }
-            100% { transform: scale(2); opacity: 0; }
-        }
-
-        .pulse-dot::before {
-            content: '';
+        .ad-container::before {
+            content: "ADVERTISEMENT";
             position: absolute;
-            inset: 0;
+            top: 4px;
+            left: 8px;
+            font-size: 0.55rem;
+            color: rgba(255,255,255,0.3);
+            letter-spacing: 1px;
+        }
+        .ad-mock-content {
+            background: linear-gradient(135deg, #1e1e2d, #151521);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+
+        /* Redirect Loader */
+        .loader-ring {
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
-            background: inherit;
-            animation: pulse-ring 2s ease-out infinite;
+            border: 3px solid transparent;
+            border-top-color: #6366f1;
+            border-right-color: #8b5cf6;
+            animation: spin 1s linear infinite;
         }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        .fade-in {
-            animation: fadeIn 0.5s ease;
+        /* Mobile adjustments for table */
+        @media (max-width: 768px) {
+            .desktop-only { display: none; }
+            .mobile-card { display: flex; flex-direction: column; gap: 0.5rem; padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
         }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .link-row {
-            animation: fadeIn 0.3s ease;
-        }
-
-        .redirect-screen {
-            background: #0f0f1a;
-        }
-
-        .spinner {
-            border: 3px solid rgba(99, 102, 241, 0.2);
-            border-top: 3px solid #6366f1;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
-
-        .empty-state-icon {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
-        }
-
-        .stat-card {
-            background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-        }
-
-        .table-header {
-            background: rgba(255, 255, 255, 0.02);
+        @media (min-width: 769px) {
+            .mobile-only { display: none; }
         }
     </style>
 </head>
-<body class="gradient-bg text-white">
+<body class="antialiased">
 
-    <!-- ============ REDIRECT SCREEN (shown when tracking link is clicked) ============ -->
-    <div id="redirectScreen" class="redirect-screen fixed inset-0 z-50 flex items-center justify-center hidden">
-        <div class="text-center fade-in">
-            <div class="spinner mx-auto mb-6"></div>
-            <h2 class="text-xl font-semibold text-white mb-2">Redirecting you...</h2>
-            <p class="text-gray-400 text-sm">You'll be there in a moment</p>
+    <!-- Background Orbs -->
+    <div class="bg-shape bg-shape-1"></div>
+    <div class="bg-shape bg-shape-2"></div>
+    <div class="bg-shape bg-shape-3"></div>
+
+    <!-- ============ REDIRECT INTERSTITIAL SCREEN ============ -->
+    <div id="redirectScreen" class="fixed inset-0 z-50 hidden bg-dark-900 flex-col items-center justify-center p-6">
+        
+        <!-- Header -->
+        <div class="absolute top-6 left-6 flex items-center gap-2">
+            <svg class="w-6 h-6 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.172 13.828a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+            </svg>
+            <span class="font-bold text-gray-300">LinkSpy</span>
+        </div>
+
+        <div class="max-w-2xl w-full text-center flex flex-col items-center gap-8 fade-in">
+            <!-- Mock Ad Space (Redirect Screen) -->
+            <div class="ad-container h-64 w-full flex items-center justify-center p-4">
+                <div class="ad-mock-content flex-col sm:flex-row text-left">
+                    <div class="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl flex items-center justify-center shrink-0">
+                        <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-white font-bold text-lg">Supercharge Your Workflow</h3>
+                        <p class="text-gray-400 text-sm mt-1 mb-3">Join 10,000+ professionals using AcmeTools to save 10 hours a week.</p>
+                        <button class="bg-white text-black px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-gray-200 transition">Learn More</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loader & Countdown -->
+            <div class="glass-card rounded-2xl p-8 w-full max-w-sm mx-auto shadow-2xl flex flex-col items-center">
+                <div class="relative flex justify-center items-center w-24 h-24 mb-4">
+                    <div class="loader-ring absolute inset-0"></div>
+                    <span id="countdownText" class="text-3xl font-black text-white">3</span>
+                </div>
+                <h2 class="text-xl font-bold text-white mb-2">Preparing your link...</h2>
+                <p class="text-gray-400 text-sm">Please wait while we verify your destination.</p>
+                <div class="w-full bg-dark-800 rounded-full h-1.5 mt-6 overflow-hidden">
+                    <div id="progressBar" class="bg-brand-500 h-1.5 rounded-full transition-all duration-1000 ease-linear" style="width: 0%"></div>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- ============ MAIN DASHBOARD ============ -->
-    <div id="dashboard">
+    <div id="dashboard" class="relative z-10 flex flex-col min-h-screen">
 
         <!-- NAV -->
-        <nav class="border-b border-white/5">
-            <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+        <nav class="glass-card sticky top-0 z-40 border-b-0 border-white/5 bg-dark-900/60">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-xl glow-btn flex items-center justify-center shadow-none">
+                    <div class="w-10 h-10 rounded-xl glow-btn flex items-center justify-center">
                         <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101" />
                             <path stroke-linecap="round" stroke-linejoin="round" d="M10.172 13.828a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                         </svg>
                     </div>
-                    <span class="text-xl font-bold tracking-tight">Link<span class="text-brand-400">Spy</span></span>
+                    <span class="text-2xl font-black tracking-tight text-white">Link<span class="text-brand-400">Spy</span><span class="text-xs ml-1 bg-brand-500/20 text-brand-300 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">Pro</span></span>
                 </div>
-                <button onclick="clearAllLinks()" class="text-xs text-gray-500 hover:text-red-400 transition-colors px-3 py-1.5 rounded-lg hover:bg-red-400/5 border border-transparent hover:border-red-400/20">
-                    Clear All
+                <button onclick="clearAllLinks()" class="text-sm font-medium text-gray-400 hover:text-red-400 transition-colors px-4 py-2 rounded-xl hover:bg-red-400/10 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    <span class="hidden sm:inline">Clear All Data</span>
                 </button>
             </div>
         </nav>
 
-        <!-- HERO + FORM -->
-        <section class="max-w-6xl mx-auto px-6 pt-16 pb-10">
-            <div class="text-center mb-12 fade-in">
-                <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
-                    Track Every
-                    <span class="bg-gradient-to-r from-brand-400 via-purple-400 to-blue-400 bg-clip-text text-transparent"> Click</span>
+        <main class="flex-grow max-w-6xl mx-auto w-full px-4 sm:px-6 py-8 space-y-12">
+            
+            <!-- Ad Space: Top Leaderboard -->
+            <div class="ad-container h-24 w-full fade-in hidden sm:flex">
+                <div class="text-gray-400 text-sm flex items-center gap-2">
+                    <span class="text-brand-400 font-bold">AdSpace:</span> Reach 5M+ developers. <a href="#" class="underline text-white hover:text-brand-300">Advertise here</a>
+                </div>
+            </div>
+
+            <!-- HERO & FORM SECTION -->
+            <section class="text-center fade-in delay-100 relative">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-300 text-xs font-semibold mb-6">
+                    <span class="relative flex h-2 w-2">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-2 w-2 bg-brand-500"></span>
+                    </span>
+                    Live Link Tracking Engine Active
+                </div>
+                <h1 class="text-5xl md:text-6xl font-black tracking-tight mb-6 leading-tight">
+                    Track Every Single
+                    <span class="relative whitespace-nowrap">
+                        <span class="relative bg-gradient-to-r from-brand-400 via-purple-400 to-blue-400 bg-clip-text text-transparent">Click</span>
+                    </span>
                 </h1>
-                <p class="text-gray-400 text-lg max-w-xl mx-auto leading-relaxed">
-                    Paste any URL, get a trackable link. Know exactly when someone clicks it.
+                <p class="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed mb-10">
+                    Transform long URLs into powerful, trackable short links. Instantly know when your audience engages with your content.
                 </p>
-            </div>
 
-            <!-- INPUT CARD -->
-            <div class="glass-card rounded-2xl p-8 max-w-2xl mx-auto fade-in">
-                <form id="linkForm" onsubmit="return createTrackingLink(event)" class="space-y-4">
-                    <label class="block text-sm font-medium text-gray-300 mb-1">Enter your destination URL</label>
-                    <div class="flex flex-col sm:flex-row gap-3">
-                        <div class="relative flex-1">
-                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                                </svg>
+                <!-- Form Card -->
+                <div class="glass-card rounded-3xl p-6 sm:p-8 max-w-3xl mx-auto relative overflow-hidden">
+                    <!-- decorative flare -->
+                    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-1 bg-gradient-to-r from-transparent via-brand-500 to-transparent opacity-50"></div>
+                    
+                    <form id="linkForm" onsubmit="return createTrackingLink(event)" class="relative z-10">
+                        <div class="flex flex-col md:flex-row gap-4">
+                            <div class="relative flex-1">
+                                <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.172 13.828a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                                    </svg>
+                                </div>
+                                <input
+                                    type="url"
+                                    id="urlInput"
+                                    placeholder="Paste your long URL here (https://...)"
+                                    required
+                                    class="w-full bg-dark-900/50 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white placeholder-gray-500 focus:outline-none glow-input transition-all text-base"
+                                />
                             </div>
-                            <input
-                                type="url"
-                                id="urlInput"
-                                placeholder="https://example.com"
-                                required
-                                class="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-11 pr-4 text-white placeholder-gray-500 focus:outline-none glow-input transition-all text-sm"
-                            />
+                            <button type="submit" class="glow-btn text-white font-bold px-8 py-4 rounded-2xl text-base whitespace-nowrap shadow-lg hover:shadow-brand-500/25">
+                                Shorten & Track
+                            </button>
                         </div>
-                        <button type="submit" class="glow-btn text-white font-semibold px-8 py-3.5 rounded-xl text-sm whitespace-nowrap">
-                            Generate Link
-                        </button>
-                    </div>
-                    <p id="formError" class="text-red-400 text-xs mt-1 hidden"></p>
-                </form>
+                        <p id="formError" class="text-red-400 text-sm mt-3 hidden text-left pl-2"></p>
+                    </form>
 
-                <!-- GENERATED LINK OUTPUT -->
-                <div id="generatedResult" class="hidden mt-6 pt-6 border-t border-white/5">
-                    <label class="block text-sm font-medium text-gray-300 mb-2">Your tracking link</label>
-                    <div class="flex items-center gap-2 bg-white/5 rounded-xl p-1">
-                        <input
-                            type="text"
-                            id="generatedLink"
-                            readonly
-                            class="flex-1 bg-transparent border-none py-2.5 px-4 text-brand-300 text-sm focus:outline-none select-all"
-                        />
-                        <button onclick="copyLink()" class="bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold px-5 py-2.5 rounded-lg transition-colors flex items-center gap-2">
-                            <svg id="copyIcon" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+                    <!-- GENERATED LINK OUTPUT -->
+                    <div id="generatedResult" class="hidden mt-6 pt-6 border-t border-white/10">
+                        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-brand-900/20 border border-brand-500/30 rounded-2xl p-2 pl-4">
+                            <input
+                                type="text"
+                                id="generatedLink"
+                                readonly
+                                class="flex-1 bg-transparent border-none text-brand-300 font-medium text-sm focus:outline-none select-all w-full truncate"
+                            />
+                            <button onclick="copyLink()" class="w-full sm:w-auto bg-brand-600 hover:bg-brand-500 text-white text-sm font-bold px-6 py-3 rounded-xl transition-colors flex items-center justify-center gap-2 shrink-0">
+                                <svg id="copyIcon" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+                                </svg>
+                                <span id="copyText">Copy Link</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ad Space: Middle Banner -->
+            <div class="ad-container h-32 w-full fade-in delay-200">
+                <div class="ad-mock-content w-[95%] sm:w-[80%] flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center">
+                            <span class="text-2xl">🌍</span>
+                        </div>
+                        <div class="text-left">
+                            <h4 class="text-white font-bold text-sm sm:text-base">Host your next site for free</h4>
+                            <p class="text-gray-400 text-xs sm:text-sm">Deploy in seconds with GlobalNet.</p>
+                        </div>
+                    </div>
+                    <button class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition">Start Free</button>
+                </div>
+            </div>
+
+            <!-- STATS SECTION -->
+            <section class="fade-in delay-200">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="glass-card rounded-2xl p-6 relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+                        <p class="text-gray-400 text-sm font-medium mb-1">Total Links</p>
+                        <p class="text-4xl font-black text-white" id="statTotal">0</p>
+                    </div>
+                    <div class="glass-card rounded-2xl p-6 relative overflow-hidden group border-b-2 border-b-green-500/50">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-green-500/5 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+                        <p class="text-gray-400 text-sm font-medium mb-1">Total Clicks</p>
+                        <p class="text-4xl font-black text-green-400" id="statClicked">0</p>
+                    </div>
+                    <div class="glass-card rounded-2xl p-6 relative overflow-hidden group border-b-2 border-b-yellow-500/50">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-yellow-500/5 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+                        <p class="text-gray-400 text-sm font-medium mb-1">Awaiting Clicks</p>
+                        <p class="text-4xl font-black text-yellow-400" id="statPending">0</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- LINKS TABLE/LIST SECTION -->
+            <section class="fade-in delay-200">
+                <div class="glass-card rounded-3xl overflow-hidden border border-white/10">
+                    <div class="px-6 py-5 border-b border-white/10 bg-white/[0.02] flex items-center justify-between">
+                        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                            <svg class="w-5 h-5 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                             </svg>
-                            <span id="copyText">Copy</span>
+                            Your Tracked Links
+                        </h2>
+                        <button onclick="refreshStatus()" class="text-sm font-medium text-brand-400 hover:text-brand-300 bg-brand-400/10 hover:bg-brand-400/20 px-4 py-2 rounded-xl transition-colors flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            Refresh
                         </button>
                     </div>
-                </div>
-            </div>
-        </section>
 
-        <!-- STATS BAR -->
-        <section class="max-w-6xl mx-auto px-6 pb-6">
-            <div class="grid grid-cols-3 gap-4 max-w-2xl mx-auto" id="statsBar">
-                <div class="stat-card rounded-xl p-4 text-center">
-                    <p class="text-2xl font-bold text-white" id="statTotal">0</p>
-                    <p class="text-xs text-gray-500 mt-1">Total Links</p>
-                </div>
-                <div class="stat-card rounded-xl p-4 text-center">
-                    <p class="text-2xl font-bold text-green-400" id="statClicked">0</p>
-                    <p class="text-xs text-gray-500 mt-1">Clicked</p>
-                </div>
-                <div class="stat-card rounded-xl p-4 text-center">
-                    <p class="text-2xl font-bold text-yellow-400" id="statPending">0</p>
-                    <p class="text-xs text-gray-500 mt-1">Pending</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- LINKS TABLE -->
-        <section class="max-w-6xl mx-auto px-6 pb-20">
-            <div class="glass-card rounded-2xl overflow-hidden">
-                <div class="px-6 py-4 border-b border-white/5 flex items-center justify-between">
-                    <h2 class="text-lg font-semibold">Your Tracked Links</h2>
-                    <button onclick="refreshStatus()" class="text-xs text-gray-400 hover:text-brand-400 transition-colors flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-brand-400/5">
-                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                        Refresh
-                    </button>
-                </div>
-
-                <!-- EMPTY STATE -->
-                <div id="emptyState" class="py-16 text-center">
-                    <div class="empty-state-icon w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-10 h-10 text-brand-400/50" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M10.172 13.828a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                        </svg>
+                    <!-- EMPTY STATE -->
+                    <div id="emptyState" class="py-24 text-center px-4">
+                        <div class="w-24 h-24 rounded-full bg-dark-800 border border-white/5 flex items-center justify-center mx-auto mb-6 shadow-inner">
+                            <svg class="w-10 h-10 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10.172 13.828a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2">No links tracked yet</h3>
+                        <p class="text-gray-400 text-base max-w-sm mx-auto">Paste a long URL in the form above to generate your first tracked link and monitor clicks instantly.</p>
                     </div>
-                    <p class="text-gray-500 text-sm">No links created yet.</p>
-                    <p class="text-gray-600 text-xs mt-1">Paste a URL above to get started.</p>
-                </div>
 
-                <!-- TABLE -->
-                <div id="linksTableContainer" class="hidden">
-                    <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead>
-                                <tr class="table-header text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    <th class="px-6 py-3">Original URL</th>
-                                    <th class="px-6 py-3">Tracking Link</th>
-                                    <th class="px-6 py-3 text-center">Status</th>
-                                    <th class="px-6 py-3 text-center">Clicks</th>
-                                    <th class="px-6 py-3 text-center">Created</th>
-                                    <th class="px-6 py-3 text-center">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="linksTableBody" class="divide-y divide-white/5">
-                            </tbody>
-                        </table>
+                    <!-- DESKTOP TABLE & MOBILE LIST -->
+                    <div id="linksContainer" class="hidden">
+                        <!-- Desktop View (Table) -->
+                        <div class="hidden md:block overflow-x-auto">
+                            <table class="w-full whitespace-nowrap">
+                                <thead>
+                                    <tr class="bg-dark-800/50 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
+                                        <th class="px-6 py-4">Original URL</th>
+                                        <th class="px-6 py-4">Short Link</th>
+                                        <th class="px-6 py-4 text-center">Status</th>
+                                        <th class="px-6 py-4 text-center">Clicks</th>
+                                        <th class="px-6 py-4 text-center">Created</th>
+                                        <th class="px-6 py-4 text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="linksTableBody" class="divide-y divide-white/5">
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Mobile View (Cards) -->
+                        <div id="linksMobileBody" class="md:hidden flex flex-col divide-y divide-white/5">
+                            <!-- Populated by JS -->
+                        </div>
                     </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- FOOTER -->
-        <footer class="border-t border-white/5 py-6 text-center text-gray-600 text-xs">
-            LinkSpy &mdash; Simple client-side link tracking. All data stored in your browser.
+        </main>
+
+        <!-- FOOTER & BOTTOM AD -->
+        <footer class="mt-auto border-t border-white/10 bg-dark-900/80 backdrop-blur-md pt-8 pb-12">
+            <div class="max-w-6xl mx-auto px-6">
+                <!-- Ad Space: Bottom Rect -->
+                <div class="ad-container h-20 w-full mb-8 max-w-3xl mx-auto">
+                     <p class="text-xs text-gray-500">Sponsored Links</p>
+                     <div class="flex gap-4 mt-1">
+                         <a href="#" class="text-sm font-medium text-brand-300 hover:underline">Get 50% off VPN</a>
+                         <span class="text-gray-700">|</span>
+                         <a href="#" class="text-sm font-medium text-brand-300 hover:underline">Best Web Hosting 2026</a>
+                     </div>
+                </div>
+                
+                <div class="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-500">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                        LinkSpy Pro &copy; 2026. Client-side tracking only.
+                    </div>
+                    <div class="flex gap-4">
+                        <a href="#" class="hover:text-white transition">Privacy</a>
+                        <a href="#" class="hover:text-white transition">Terms</a>
+                        <a href="#" class="hover:text-white transition">Advertisers</a>
+                    </div>
+                </div>
+            </div>
         </footer>
     </div>
 
     <!-- TOAST NOTIFICATION -->
-    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-brand-600 text-white text-sm font-medium px-5 py-2.5 rounded-xl shadow-lg shadow-brand-600/30 hidden z-50"></div>
+    <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-dark-800 border border-brand-500/30 text-white text-sm font-bold px-6 py-3 rounded-2xl shadow-2xl shadow-brand-500/20 transition-all duration-300 transform translate-y-20 opacity-0 z-[100] flex items-center gap-3">
+        <svg class="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span id="toastMessage">Success!</span>
+    </div>
 
     <script>
         // =============================================
         // DATA LAYER (localStorage)
         // =============================================
-        const STORAGE_KEY = 'linkspy_links';
+        const STORAGE_KEY = 'linkspy_pro_links';
 
         function getLinks() {
-            try {
-                return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-            } catch {
-                return [];
-            }
+            try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } 
+            catch { return []; }
         }
 
         function saveLinks(links) {
@@ -343,12 +478,7 @@
         }
 
         function generateId() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-            let result = '';
-            for (let i = 0; i < 8; i++) {
-                result += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            return result;
+            return Math.random().toString(36).substring(2, 8) + Math.random().toString(36).substring(2, 5);
         }
 
         function getBaseUrl() {
@@ -356,7 +486,7 @@
         }
 
         // =============================================
-        // CHECK IF THIS IS A TRACKING REDIRECT
+        // INTERSTITIAL REDIRECT LOGIC WITH MOCK AD
         // =============================================
         function handleTracking() {
             const params = new URLSearchParams(window.location.search);
@@ -368,26 +498,42 @@
             const link = links.find(l => l.id === trackId);
 
             if (link) {
-                // Record the click
+                // Record click data
                 link.clicked = true;
                 link.clickCount = (link.clickCount || 0) + 1;
                 link.lastClickedAt = new Date().toISOString();
                 saveLinks(links);
 
-                // Show redirect screen
+                // Show redirect screen with Ads
                 document.getElementById('redirectScreen').classList.remove('hidden');
-                document.getElementById('dashboard').classList.add('hidden');
+                document.getElementById('redirectScreen').classList.add('flex');
+                document.getElementById('dashboard').style.display = 'none';
+                document.body.style.overflow = 'hidden'; // prevent scroll
 
-                // Redirect after a brief moment
-                setTimeout(() => {
-                    window.location.href = link.originalUrl;
-                }, 1200);
+                // Countdown logic
+                let seconds = 3;
+                const countdownEl = document.getElementById('countdownText');
+                const progressBar = document.getElementById('progressBar');
+                
+                // Animate progress bar over 3 seconds
+                setTimeout(() => { progressBar.style.width = '100%'; }, 50);
+
+                const interval = setInterval(() => {
+                    seconds--;
+                    countdownEl.textContent = seconds;
+                    
+                    if (seconds <= 0) {
+                        clearInterval(interval);
+                        countdownEl.textContent = '0';
+                        countdownEl.classList.add('text-green-400');
+                        // Execute redirect
+                        window.location.replace(link.originalUrl);
+                    }
+                }, 1000);
 
                 return true;
-            } else {
-                // Unknown tracking ID
-                return false;
             }
+            return false; // Unknown link, just load dashboard
         }
 
         // =============================================
@@ -400,21 +546,18 @@
             const errorEl = document.getElementById('formError');
             let url = urlInput.value.trim();
 
-            // Basic validation
             if (!url) {
-                showFormError('Please enter a URL.');
+                showFormError('Please enter a destination URL.');
                 return false;
             }
 
-            // Add https:// if missing
             if (!/^https?:\/\//i.test(url)) {
                 url = 'https://' + url;
             }
 
-            try {
-                new URL(url);
-            } catch {
-                showFormError('Please enter a valid URL.');
+            try { new URL(url); } 
+            catch {
+                showFormError('Invalid URL format. Include http:// or https://');
                 return false;
             }
 
@@ -437,19 +580,14 @@
             links.unshift(linkData);
             saveLinks(links);
 
-            // Show generated link
+            // Update UI
             document.getElementById('generatedLink').value = trackingUrl;
             document.getElementById('generatedResult').classList.remove('hidden');
-            document.getElementById('copyText').textContent = 'Copy';
-
-            // Reset form
+            document.getElementById('copyText').textContent = 'Copy Link';
             urlInput.value = '';
 
-            // Refresh table
-            renderTable();
-            updateStats();
-
-            showToast('Tracking link created!');
+            renderData();
+            showToast('Tracking link generated successfully!');
             return false;
         }
 
@@ -461,39 +599,49 @@
 
         function copyLink() {
             const linkInput = document.getElementById('generatedLink');
-            navigator.clipboard.writeText(linkInput.value).then(() => {
-                document.getElementById('copyText').textContent = 'Copied!';
-                showToast('Link copied to clipboard!');
-                setTimeout(() => {
-                    document.getElementById('copyText').textContent = 'Copy';
-                }, 2000);
-            }).catch(() => {
-                // Fallback
-                linkInput.select();
-                document.execCommand('copy');
-                document.getElementById('copyText').textContent = 'Copied!';
-                showToast('Link copied!');
+            copyToClipboardRaw(linkInput.value, () => {
+                const btnText = document.getElementById('copyText');
+                btnText.textContent = 'Copied!';
+                setTimeout(() => { btnText.textContent = 'Copy Link'; }, 2000);
             });
         }
 
         function copyToClipboard(text) {
+            copyToClipboardRaw(text);
+        }
+
+        function copyToClipboardRaw(text, callback) {
             navigator.clipboard.writeText(text).then(() => {
                 showToast('Link copied to clipboard!');
+                if(callback) callback();
             }).catch(() => {
-                showToast('Failed to copy.');
+                // Fallback for older browsers / iframe restrictions
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    showToast('Link copied!');
+                    if(callback) callback();
+                } catch (err) {
+                    showToast('Failed to copy link.');
+                }
+                document.body.removeChild(textArea);
             });
         }
 
         function deleteLink(id) {
+            if(!confirm("Delete this tracked link?")) return;
             let links = getLinks();
             links = links.filter(l => l.id !== id);
             saveLinks(links);
-            renderTable();
-            updateStats();
-            showToast('Link deleted.');
+            renderData();
+            showToast('Link permanently deleted.');
         }
 
         function resetClicks(id) {
+            if(!confirm("Reset click data to zero?")) return;
             const links = getLinks();
             const link = links.find(l => l.id === id);
             if (link) {
@@ -501,131 +649,143 @@
                 link.clickCount = 0;
                 link.lastClickedAt = null;
                 saveLinks(links);
-                renderTable();
-                updateStats();
-                showToast('Click data reset.');
+                renderData();
+                showToast('Analytics reset to zero.');
             }
         }
 
         function clearAllLinks() {
             if (getLinks().length === 0) return;
-            if (confirm('Are you sure you want to delete all tracked links? This cannot be undone.')) {
+            if (confirm('Warning: This will delete ALL tracked links and analytics. Proceed?')) {
                 saveLinks([]);
-                renderTable();
-                updateStats();
+                renderData();
                 document.getElementById('generatedResult').classList.add('hidden');
-                showToast('All links cleared.');
+                showToast('All data cleared.');
             }
         }
 
         function refreshStatus() {
-            renderTable();
-            updateStats();
-            showToast('Status refreshed.');
+            renderData();
+            showToast('Analytics refreshed.', true);
         }
 
         // =============================================
-        // RENDER
+        // RENDER LOGIC
         // =============================================
-        function renderTable() {
+        function renderData() {
             const links = getLinks();
-            const tbody = document.getElementById('linksTableBody');
+            
+            // Update Stats
+            const total = links.length;
+            const clickCount = links.reduce((sum, l) => sum + (l.clickCount || 0), 0);
+            const pending = links.filter(l => !l.clicked).length;
+
+            document.getElementById('statTotal').textContent = total;
+            document.getElementById('statClicked').textContent = clickCount;
+            document.getElementById('statPending').textContent = pending;
+
+            // Update List UI
             const emptyState = document.getElementById('emptyState');
-            const tableContainer = document.getElementById('linksTableContainer');
+            const container = document.getElementById('linksContainer');
+            const tbody = document.getElementById('linksTableBody');
+            const mobileBody = document.getElementById('linksMobileBody');
 
             if (links.length === 0) {
                 emptyState.classList.remove('hidden');
-                tableContainer.classList.add('hidden');
+                container.classList.add('hidden');
                 return;
             }
 
             emptyState.classList.add('hidden');
-            tableContainer.classList.remove('hidden');
+            container.classList.remove('hidden');
 
-            tbody.innerHTML = links.map(link => {
-                const truncatedOriginal = link.originalUrl.length > 40
-                    ? link.originalUrl.substring(0, 40) + '...'
-                    : link.originalUrl;
+            let desktopHTML = '';
+            let mobileHTML = '';
 
-                const truncatedTracking = link.trackingUrl.length > 35
-                    ? link.trackingUrl.substring(0, 35) + '...'
-                    : link.trackingUrl;
+            links.forEach(link => {
+                const truncatedOrig = link.originalUrl.length > 45 ? link.originalUrl.substring(0, 45) + '...' : link.originalUrl;
+                const truncatedTrack = link.trackingUrl.length > 35 ? link.trackingUrl.substring(0, 35) + '...' : link.trackingUrl;
+                
+                const statusBadge = link.clicked 
+                    ? `<span class="status-badge status-clicked"><span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>Active</span>`
+                    : `<span class="status-badge status-pending"><span class="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse"></span>Waiting</span>`;
+                
+                const timeAgo = getTimeAgo(new Date(link.createdAt));
 
-                const statusClass = link.clicked ? 'status-clicked' : 'status-pending';
-                const statusText = link.clicked ? 'Clicked' : 'Pending';
-                const statusDotColor = link.clicked ? 'bg-green-400' : 'bg-yellow-400';
-
-                const createdDate = new Date(link.createdAt);
-                const timeAgo = getTimeAgo(createdDate);
-
-                return `
-                    <tr class="link-row glass-card-hover transition-all">
+                // Desktop Row
+                desktopHTML += `
+                    <tr class="group hover:bg-white/[0.02] transition-colors">
                         <td class="px-6 py-4">
-                            <a href="${escapeHtml(link.originalUrl)}" target="_blank"
-                               class="text-sm text-gray-300 hover:text-brand-400 transition-colors" title="${escapeHtml(link.originalUrl)}">
-                                ${escapeHtml(truncatedOriginal)}
+                            <a href="${escapeHtml(link.originalUrl)}" target="_blank" class="text-sm font-medium text-gray-300 hover:text-white truncate block max-w-xs" title="${escapeHtml(link.originalUrl)}">
+                                ${escapeHtml(truncatedOrig)}
                             </a>
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-2">
-                                <span class="text-sm text-brand-300 font-mono" title="${escapeHtml(link.trackingUrl)}">
-                                    ${escapeHtml(truncatedTracking)}
+                                <span class="text-sm text-brand-300 font-mono bg-brand-900/30 px-2 py-1 rounded border border-brand-500/20" title="${escapeHtml(link.trackingUrl)}">
+                                    ${escapeHtml(truncatedTrack)}
                                 </span>
-                                <button onclick="copyToClipboard('${escapeHtml(link.trackingUrl)}')"
-                                        class="text-gray-500 hover:text-brand-400 transition-colors p-1 rounded" title="Copy">
-                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <rect x="9" y="9" width="13" height="13" rx="2"></rect>
-                                        <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
-                                    </svg>
+                                <button onclick="copyToClipboard('${escapeHtml(link.trackingUrl)}')" class="text-gray-500 hover:text-white transition-colors p-1" title="Copy Link">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg>
                                 </button>
                             </div>
                         </td>
+                        <td class="px-6 py-4 text-center">${statusBadge}</td>
+                        <td class="px-6 py-4 text-center text-white font-bold">${link.clickCount}</td>
+                        <td class="px-6 py-4 text-center text-xs text-gray-500">${timeAgo}</td>
                         <td class="px-6 py-4 text-center">
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${statusClass}">
-                                <span class="relative w-1.5 h-1.5 rounded-full ${statusDotColor} ${link.clicked ? '' : 'pulse-dot'}"></span>
-                                ${statusText}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 text-center">
-                            <span class="text-sm font-semibold ${link.clickCount > 0 ? 'text-white' : 'text-gray-600'}">${link.clickCount}</span>
-                        </td>
-                        <td class="px-6 py-4 text-center">
-                            <span class="text-xs text-gray-500" title="${createdDate.toLocaleString()}">${timeAgo}</span>
-                        </td>
-                        <td class="px-6 py-4 text-center">
-                            <div class="flex items-center justify-center gap-1">
-                                <button onclick="resetClicks('${link.id}')" title="Reset clicks"
-                                        class="text-gray-600 hover:text-yellow-400 transition-colors p-1.5 rounded-lg hover:bg-yellow-400/5">
-                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                    </svg>
+                            <div class="flex items-center justify-center gap-2 opacity-50 group-hover:opacity-100 transition-opacity">
+                                <button onclick="resetClicks('${link.id}')" class="p-2 text-gray-400 hover:text-yellow-400 hover:bg-yellow-400/10 rounded-lg transition" title="Reset Analytics">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
                                 </button>
-                                <button onclick="deleteLink('${link.id}')" title="Delete"
-                                        class="text-gray-600 hover:text-red-400 transition-colors p-1.5 rounded-lg hover:bg-red-400/5">
-                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
+                                <button onclick="deleteLink('${link.id}')" class="p-2 text-gray-400 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition" title="Delete Link">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                 </button>
                             </div>
                         </td>
                     </tr>
                 `;
-            }).join('');
-        }
 
-        function updateStats() {
-            const links = getLinks();
-            const total = links.length;
-            const clicked = links.filter(l => l.clicked).length;
-            const pending = total - clicked;
+                // Mobile Card
+                mobileHTML += `
+                    <div class="mobile-card">
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="truncate pr-2">
+                                <p class="text-xs text-gray-500 mb-1">Destination</p>
+                                <a href="${escapeHtml(link.originalUrl)}" target="_blank" class="text-sm font-medium text-gray-200 truncate block">${escapeHtml(link.originalUrl)}</a>
+                            </div>
+                            ${statusBadge}
+                        </div>
+                        <div class="bg-dark-900/50 p-2 rounded border border-white/5 flex items-center justify-between mb-2">
+                            <span class="text-xs text-brand-300 font-mono truncate mr-2">${escapeHtml(link.trackingUrl)}</span>
+                            <button onclick="copyToClipboard('${escapeHtml(link.trackingUrl)}')" class="text-gray-400 hover:text-white shrink-0">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg>
+                            </button>
+                        </div>
+                        <div class="flex items-center justify-between text-sm mt-1">
+                            <div class="flex gap-4">
+                                <span class="text-gray-400">Clicks: <strong class="text-white">${link.clickCount}</strong></span>
+                                <span class="text-gray-500 text-xs mt-0.5">${timeAgo}</span>
+                            </div>
+                            <div class="flex gap-1">
+                                <button onclick="resetClicks('${link.id}')" class="p-1.5 text-gray-500 hover:text-yellow-400">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                                </button>
+                                <button onclick="deleteLink('${link.id}')" class="p-1.5 text-gray-500 hover:text-red-400">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
 
-            document.getElementById('statTotal').textContent = total;
-            document.getElementById('statClicked').textContent = clicked;
-            document.getElementById('statPending').textContent = pending;
+            tbody.innerHTML = desktopHTML;
+            mobileBody.innerHTML = mobileHTML;
         }
 
         // =============================================
-        // UTILITIES
+        // UTILS
         // =============================================
         function escapeHtml(str) {
             const div = document.createElement('div');
@@ -645,35 +805,37 @@
             return date.toLocaleDateString();
         }
 
-        function showToast(message) {
+        let toastTimeout;
+        function showToast(message, isSubtle = false) {
             const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.classList.remove('hidden');
-            toast.className = toast.className.replace('hidden', '');
-            toast.classList.add('copy-toast');
+            const msgEl = document.getElementById('toastMessage');
+            
+            msgEl.textContent = message;
+            
+            // Animation classes
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
 
-            setTimeout(() => {
-                toast.classList.add('hidden');
-                toast.classList.remove('copy-toast');
-            }, 2000);
+            if(toastTimeout) clearTimeout(toastTimeout);
+            
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, isSubtle ? 1500 : 3000);
         }
 
         // =============================================
         // INIT
         // =============================================
         (function init() {
-            // Check if this is a tracking redirect
+            // Check if this is a tracking redirect and handle it
             if (handleTracking()) return;
 
-            // Otherwise, render dashboard
-            renderTable();
-            updateStats();
+            // Otherwise, render normal dashboard
+            renderData();
 
-            // Auto-refresh every 5 seconds
-            setInterval(() => {
-                renderTable();
-                updateStats();
-            }, 5000);
+            // Auto-refresh stats occasionally to feel alive
+            setInterval(renderData, 10000);
         })();
     </script>
 </body>
